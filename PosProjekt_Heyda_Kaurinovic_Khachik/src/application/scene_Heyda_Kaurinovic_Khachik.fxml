@@ -59,7 +59,11 @@
                   <MenuItem fx:id="emptyListMenuItem" mnemonicParsing="false" text="New empty todo list" />
           </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="_Category" />
+        <Menu mnemonicParsing="false" text="_Category">
+               <items>
+                  <MenuItem fx:id="noneCateg" mnemonicParsing="false" text="None" />
+                  <MenuItem fx:id="doneCateg" mnemonicParsing="false" text="Done" />
+               </items></Menu>
       </menus>
     </MenuBar>
     <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">

@@ -8,6 +8,10 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import application.Todo.Status;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -36,6 +40,10 @@ public class Controller {
 	MenuItem emptyListMenuItem;
 	@FXML 
 	MenuItem clearChanges;
+	@FXML
+	MenuItem noneCateg;
+	@FXML
+	MenuItem doneCateg;
 	//ListView
 	@FXML
 	ListView<Todo> todoList;
@@ -50,13 +58,20 @@ public class Controller {
 	
 	//ObservableList
 	private ObservableList<Todo> todoObsList;
+	
+	private ArrayList<Todo> todoAll;
+	
+	private HashMap<String, Todo> todoCategoryFilter;
+	
 
 	
 	private Todo selectedItem;
 	private int selectedItemidx;
 	
 	public Controller() {
-		todoObsList= FXCollections.observableArrayList();
+		this.todoCategoryFilter = new HashMap<String, Todo>();
+		this.todoAll = new ArrayList<Todo>();
+		this.todoObsList= FXCollections.observableArrayList();
 	}
 	
 	@FXML
@@ -111,6 +126,7 @@ public class Controller {
 	
 	//Habe extra Methode gemacht, dass Heyda diese aufrufen kann, wenn er von CSV zur ListView/ObsList hinzufügt
 	public void addToList(Todo todoItem) {
+		this.todoAll.add(todoItem);
 		this.todoObsList.add(todoItem);
 	}
 	
@@ -134,6 +150,7 @@ public class Controller {
 	public void createAlert(String header, String errMsg) {
 		System.out.println(header + " " + errMsg);
 	}
+	
 	
 	// custom listeners
 	public void itemClicked(MouseEvent e) {
