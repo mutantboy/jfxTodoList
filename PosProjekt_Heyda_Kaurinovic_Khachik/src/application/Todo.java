@@ -117,5 +117,11 @@ public class Todo {
 	public String toString() {
 		return this.header + ": " + this.dateCreated;
 	}
+
+
+
+	public String toCsv() {
+		return getHeader() + ";" + getCategory() + ";" + getTodo();
+	}
 	
 }

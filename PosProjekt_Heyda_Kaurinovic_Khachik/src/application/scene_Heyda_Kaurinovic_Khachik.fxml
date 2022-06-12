@@ -49,11 +49,11 @@
       <menus>
         <Menu mnemonicParsing="false" text="_File ">
           <items>
-            <MenuItem fx:id="openMenuItem" mnemonicParsing="false" text="Open…" />
+            <MenuItem fx:id="openMenuItem" mnemonicParsing="false" text="Open…" onAction="#openFile" />
             <Menu mnemonicParsing="false" text="Open Recent" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="saveNormalMenuItem" mnemonicParsing="false" text="Save" />
-                  <MenuItem fx:id="saveToMenuItem" mnemonicParsing="false" text="Save as" />
+                  <MenuItem fx:id="saveToMenuItem" mnemonicParsing="false" text="Save as" onAction="#saveAs" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="clearChanges" mnemonicParsing="false" onAction="#resetAll" text="Clear Changes" />
                   <MenuItem fx:id="emptyListMenuItem" mnemonicParsing="false" text="New empty todo list" />

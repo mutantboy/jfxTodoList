@@ -3,15 +3,31 @@ package application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.Window;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
+import Csv.CsvIo;
 import javafx.scene.input.MouseEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+
 
 import application.Todo.Status;
 import javafx.collections.FXCollections;
@@ -80,6 +96,8 @@ public class Controller {
 	
 	@FXML
 	public void initialize() {
+		ArrayList<Todo> loadedTodos = CsvIo.LoadCSV();
+		todoObsList.addAll(loadedTodos);
 		todoList.setItems(todoObsList); //ListView is null when in construction stage, but not when initializing FXML file
 		setListeners(); //setting listeners after initialization of FXML and not after construction of class
 		this.todoCategoryFilter.put(allCateg.getText().toUpperCase(), new ArrayList<Todo>());
@@ -131,6 +149,7 @@ public class Controller {
 		
 		setObsListContent(this.todoCategoryFilter.get(selectedCategory));	
 		resetInput(e);
+		CsvIo.writeCsv(this.todoObsList);
 	}
 	
 	public void resetInput(ActionEvent e) {
@@ -150,6 +169,41 @@ public class Controller {
 		setObsListContent(this.todoCategoryFilter.get(allCateg.getText().toUpperCase()));
 
 	}
+	public void saveAs(ActionEvent e) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Wähle Todo Speicherort");
+		
+		fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+
+		fileChooser.getExtensionFilters().addAll(
+			    new FileChooser.ExtensionFilter("TodoList", "*.csv")
+		);
+		File newFileLocation = fileChooser.showOpenDialog(new Stage());
+		if(newFileLocation == null) {
+			return;
+		}
+		CsvIo.setFilePath(newFileLocation.getPath());
+		CsvIo.writeCsv(this.todoObsList);
+	}
+	
+	public void openFile(ActionEvent e) {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle("Wähle Todo Speicherort");
+		
+		fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+
+		fileChooser.getExtensionFilters().addAll(
+			    new FileChooser.ExtensionFilter("TodoList", "*.csv")
+		);
+		File newFileLocation = fileChooser.showOpenDialog(new Stage());
+		if(newFileLocation == null) {
+			return;
+		}
+		CsvIo.setFilePath(newFileLocation.getPath());
+		todoObsList.clear();
+		ArrayList<Todo> loadedTodos = CsvIo.LoadCSV();
+		todoObsList.addAll(loadedTodos);
+	}
 	
 	//None ActionEvent listeners from FXML / Scene builder
 	
@@ -157,7 +211,7 @@ public class Controller {
 		return (this.categoryTxt.getText().equals("") || this.headerTxt.getText().equals("") || this.todoTxt.getText().equals("")) ? false : true;
 	}
 	
-	//Habe extra Methode gemacht, dass Heyda diese aufrufen kann, wenn er von CSV zur ListView/ObsList hinzuf�gt
+	//Habe extra Methode gemacht, dass Heyda diese aufrufen kann, wenn er von CSV zur ListView/ObsList hinzuf�gt
 	public void addToList(Todo todoItem) {
 		if(!checkCategoryInMap(todoItem.getCategory())) {
 			createCategoryMenuItem(todoItem.getCategory());
@@ -166,6 +220,7 @@ public class Controller {
 		this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).add(todoItem);
 		this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).add(todoItem);
 		this.todoObsList.add(todoItem);
+		CsvIo.writeCsv(this.todoObsList);
 	}
 	
 	
@@ -184,6 +239,7 @@ public class Controller {
 		this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).set(idxCateg, todoItem);
 		//System.out.println(idxAll + " " + idxCateg);
 		this.todoObsList.set(selectedItemidx, todoItem);
+		CsvIo.writeCsv(this.todoObsList);
 
 	}
 	
@@ -231,4 +287,5 @@ public class Controller {
 	public void setListeners() {
 		this.todoList.setOnMouseClicked((e) -> itemClicked(e));
 	}
+	
 }
