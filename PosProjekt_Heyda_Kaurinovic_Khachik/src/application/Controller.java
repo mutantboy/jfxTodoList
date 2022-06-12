@@ -71,6 +71,8 @@ public class Controller {
 	private Todo selectedItem;
 	private int selectedItemidx;
 	
+	private String selectedCategory;
+	
 	public Controller() {
 		this.todoCategoryFilter = new HashMap<String, ArrayList<Todo>>();
 		this.todoObsList= FXCollections.observableArrayList();
@@ -82,6 +84,7 @@ public class Controller {
 		setListeners(); //setting listeners after initialization of FXML and not after construction of class
 		this.todoCategoryFilter.put(allCateg.getText().toUpperCase(), new ArrayList<Todo>());
 		this.todoCategoryFilter.put(doneCateg.getText().toUpperCase(), new ArrayList<Todo>());
+		this.selectedCategory = allCateg.getText().toUpperCase();
 	}
 	
 	//ActionEvents from FXML / Scene builder
@@ -111,7 +114,23 @@ public class Controller {
 	}
 	
 	public void deleteTodo(ActionEvent e) {
-		this.todoObsList.remove(this.selectedItemidx);
+		Todo itemToDelete = this.todoObsList.get(selectedItemidx);
+
+		if (selectedCategory.equals(allCateg.getText().toUpperCase())) {
+			this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).remove(itemToDelete);
+			this.todoCategoryFilter.get(itemToDelete.getCategory().toUpperCase()).remove(itemToDelete);
+		}
+		else if (selectedCategory.equals(doneCateg.getText().toUpperCase())) {
+			this.todoCategoryFilter.get(selectedCategory).remove(itemToDelete);
+		}
+		else {
+			this.todoCategoryFilter.get(selectedCategory).remove(itemToDelete);
+			this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).remove(itemToDelete);
+
+		}
+		
+		setObsListContent(this.todoCategoryFilter.get(selectedCategory));	
+		resetInput(e);
 	}
 	
 	public void resetInput(ActionEvent e) {
@@ -123,7 +142,13 @@ public class Controller {
 	}
 	
 	public void getClickedMenuItem(ActionEvent e) {
-		
+		this.selectedCategory = ((MenuItem)e.getTarget()).getText().toUpperCase();
+		setObsListContent(this.todoCategoryFilter.get(selectedCategory));
+	}
+	
+	public void displayAllTodos(ActionEvent e) {
+		setObsListContent(this.todoCategoryFilter.get(allCateg.getText().toUpperCase()));
+
 	}
 	
 	//None ActionEvent listeners from FXML / Scene builder
@@ -148,6 +173,16 @@ public class Controller {
 		todoItem.setCategory(this.categoryTxt.getText());
 		todoItem.setHeader(this.headerTxt.getText());
 		todoItem.setTodo(this.todoTxt.getText());
+		if (!todoItem.getCategory().equals(this.categoryTxt.getText())) {
+			
+		}
+		//Get the indicies of both Lists
+		int idxAll = this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).indexOf(todoItem);
+		int idxCateg = this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).indexOf(todoItem);
+		//set them
+		this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).set(idxAll, todoItem);
+		this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).set(idxCateg, todoItem);
+		//System.out.println(idxAll + " " + idxCateg);
 		this.todoObsList.set(selectedItemidx, todoItem);
 
 	}
@@ -176,6 +211,10 @@ public class Controller {
 		MenuItem item = new MenuItem();
 		item.setText(category);
 		this.categoryMenu.getItems().add(item);
+	}
+	
+	public void removeCategoryFromMenu(String category) {
+		//this.categoryMenu.getItems().removeAll(null);
 	}
 	
 	
