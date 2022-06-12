@@ -4,6 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -41,9 +42,12 @@ public class Controller {
 	@FXML 
 	MenuItem clearChanges;
 	@FXML
-	MenuItem noneCateg;
+	MenuItem allCateg;
 	@FXML
 	MenuItem doneCateg;
+	
+	@FXML
+	Menu categoryMenu;
 	//ListView
 	@FXML
 	ListView<Todo> todoList;
@@ -59,9 +63,8 @@ public class Controller {
 	//ObservableList
 	private ObservableList<Todo> todoObsList;
 	
-	private ArrayList<Todo> todoAll;
 	
-	private HashMap<String, Todo> todoCategoryFilter;
+	private HashMap<String, ArrayList<Todo>> todoCategoryFilter;
 	
 
 	
@@ -69,8 +72,7 @@ public class Controller {
 	private int selectedItemidx;
 	
 	public Controller() {
-		this.todoCategoryFilter = new HashMap<String, Todo>();
-		this.todoAll = new ArrayList<Todo>();
+		this.todoCategoryFilter = new HashMap<String, ArrayList<Todo>>();
 		this.todoObsList= FXCollections.observableArrayList();
 	}
 	
@@ -78,6 +80,8 @@ public class Controller {
 	public void initialize() {
 		todoList.setItems(todoObsList); //ListView is null when in construction stage, but not when initializing FXML file
 		setListeners(); //setting listeners after initialization of FXML and not after construction of class
+		this.todoCategoryFilter.put(allCateg.getText().toUpperCase(), new ArrayList<Todo>());
+		this.todoCategoryFilter.put(doneCateg.getText().toUpperCase(), new ArrayList<Todo>());
 	}
 	
 	//ActionEvents from FXML / Scene builder
@@ -118,6 +122,10 @@ public class Controller {
 		
 	}
 	
+	public void getClickedMenuItem(ActionEvent e) {
+		
+	}
+	
 	//None ActionEvent listeners from FXML / Scene builder
 	
 	public boolean checkInputFields() {
@@ -126,7 +134,12 @@ public class Controller {
 	
 	//Habe extra Methode gemacht, dass Heyda diese aufrufen kann, wenn er von CSV zur ListView/ObsList hinzufügt
 	public void addToList(Todo todoItem) {
-		this.todoAll.add(todoItem);
+		if(!checkCategoryInMap(todoItem.getCategory())) {
+			createCategoryMenuItem(todoItem.getCategory());
+			this.todoCategoryFilter.put(todoItem.getCategory().toUpperCase(), new ArrayList<Todo>());
+		} 
+		this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).add(todoItem);
+		this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).add(todoItem);
 		this.todoObsList.add(todoItem);
 	}
 	
@@ -149,6 +162,20 @@ public class Controller {
 	
 	public void createAlert(String header, String errMsg) {
 		System.out.println(header + " " + errMsg);
+	}
+	
+	public void setObsListContent(ArrayList<Todo> list) {
+		this.todoObsList.setAll(list);
+	}
+	
+	public boolean checkCategoryInMap(String category) {
+		return (todoCategoryFilter.containsKey(category.toUpperCase())) ? true : false;
+	}
+	
+	public void createCategoryMenuItem(String category) {
+		MenuItem item = new MenuItem();
+		item.setText(category);
+		this.categoryMenu.getItems().add(item);
 	}
 	
 	

@@ -19,6 +19,7 @@ public class Main extends Application {
 		Parent root = FXMLLoader.load(getClass().getResource("scene_Heyda_Kaurinovic_Khachik.fxml"));
 		Scene scene = new Scene(root);
 		primaryStage.setScene(scene);
+		primaryStage.setResizable(false);
 		primaryStage.show();
 		
 	}
