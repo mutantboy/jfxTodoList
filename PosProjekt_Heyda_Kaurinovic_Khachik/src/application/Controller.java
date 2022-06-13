@@ -13,6 +13,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
+import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -102,6 +103,9 @@ public class Controller {
 		setListeners(); //setting listeners after initialization of FXML and not after construction of class
 		this.todoCategoryFilter.put(allCateg.getText().toUpperCase(), new ArrayList<Todo>());
 		this.todoCategoryFilter.put(doneCateg.getText().toUpperCase(), new ArrayList<Todo>());
+		loadedTodos.forEach(item -> {
+			populateCategoryMenuItemsAndCategoryLists(item);
+		});
 		this.selectedCategory = allCateg.getText().toUpperCase();
 	}
 	
@@ -127,8 +131,17 @@ public class Controller {
 	}
 	
 	public void todoDone(ActionEvent e) {
-		selectedItem.setStatus(Status.getStatusFromCode(1));
-		System.out.println(selectedItem.getStatus().ordinal());
+		try {
+			Todo  itemToBeSetDone = this.todoObsList.get(selectedItemidx);
+			itemToBeSetDone.setStatus(Status.DONE);
+			this.todoCategoryFilter.get(itemToBeSetDone.getCategory().toUpperCase()).remove(itemToBeSetDone);
+			this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).remove(itemToBeSetDone);
+			this.todoCategoryFilter.get(doneCateg.getText().toUpperCase()).add(itemToBeSetDone);
+			if (selectedCategory.equals(allCateg.getText().toUpperCase())) setObsListContent(this.todoCategoryFilter.get(allCateg.getText().toUpperCase()));
+			if (selectedCategory.equals(itemToBeSetDone.getCategory().toUpperCase())) setObsListContent(this.todoCategoryFilter.get(itemToBeSetDone.getCategory().toUpperCase()));
+		}catch (IndexOutOfBoundsException exp) {
+			System.out.println("index is out of bound in todoDone call");
+		}
 	}
 	
 	public void deleteTodo(ActionEvent e) {
@@ -162,16 +175,24 @@ public class Controller {
 	
 	public void getClickedMenuItem(ActionEvent e) {
 		this.selectedCategory = ((MenuItem)e.getTarget()).getText().toUpperCase();
-		setObsListContent(this.todoCategoryFilter.get(selectedCategory));
+		ArrayList<Todo> categoryFilteredList = this.todoCategoryFilter.get(selectedCategory);
+		if (categoryFilteredList == null) return;
+		setObsListContent(categoryFilteredList);
 	}
 	
 	public void displayAllTodos(ActionEvent e) {
 		setObsListContent(this.todoCategoryFilter.get(allCateg.getText().toUpperCase()));
 
 	}
+	
+	public void displayDone(ActionEvent e) {
+		setObsListContent(this.todoCategoryFilter.get(doneCateg.getText().toUpperCase()));
+	}
+	
+	//File Logic
 	public void saveAs(ActionEvent e) {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("WÃ¤hle Todo Speicherort");
+		fileChooser.setTitle("Wähle Todo Speicherort");
 		
 		fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 
@@ -188,7 +209,7 @@ public class Controller {
 	
 	public void openFile(ActionEvent e) {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle("WÃ¤hle Todo Speicherort");
+		fileChooser.setTitle("Wähle Todo Speicherort");
 		
 		fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 
@@ -202,6 +223,9 @@ public class Controller {
 		CsvIo.setFilePath(newFileLocation.getPath());
 		todoObsList.clear();
 		ArrayList<Todo> loadedTodos = CsvIo.LoadCSV();
+		for (Todo item : loadedTodos) {
+			populateCategoryMenuItemsAndCategoryLists(item);
+		}
 		todoObsList.addAll(loadedTodos);
 	}
 	
@@ -211,14 +235,24 @@ public class Controller {
 		return (this.categoryTxt.getText().equals("") || this.headerTxt.getText().equals("") || this.todoTxt.getText().equals("")) ? false : true;
 	}
 	
-	//Habe extra Methode gemacht, dass Heyda diese aufrufen kann, wenn er von CSV zur ListView/ObsList hinzufï¿½gt
-	public void addToList(Todo todoItem) {
+	private void populateCategoryMenuItemsAndCategoryLists(Todo todoItem) {
 		if(!checkCategoryInMap(todoItem.getCategory())) {
 			createCategoryMenuItem(todoItem.getCategory());
 			this.todoCategoryFilter.put(todoItem.getCategory().toUpperCase(), new ArrayList<Todo>());
 		} 
 		this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).add(todoItem);
 		this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).add(todoItem);
+	}
+	
+	//Habe extra Methode gemacht, dass Heyda diese aufrufen kann, wenn er von CSV zur ListView/ObsList hinzufï¿½gt
+	public void addToList(Todo todoItem) {
+		/*if(!checkCategoryInMap(todoItem.getCategory())) {
+			createCategoryMenuItem(todoItem.getCategory());
+			this.todoCategoryFilter.put(todoItem.getCategory().toUpperCase(), new ArrayList<Todo>());
+		} 
+		this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).add(todoItem);
+		this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).add(todoItem);*/
+		populateCategoryMenuItemsAndCategoryLists(todoItem);
 		this.todoObsList.add(todoItem);
 		CsvIo.writeCsv(this.todoObsList);
 	}
@@ -248,9 +282,7 @@ public class Controller {
 		this.headerTxt.setText("");
 		this.todoTxt.setText("");
 	}
-	
-	
-	
+
 	public void createAlert(String header, String errMsg) {
 		System.out.println(header + " " + errMsg);
 	}

@@ -49,11 +49,11 @@
       <menus>
         <Menu mnemonicParsing="false" text="_File ">
           <items>
-            <MenuItem fx:id="openMenuItem" mnemonicParsing="false" text="Open…" onAction="#openFile" />
+            <MenuItem fx:id="openMenuItem" mnemonicParsing="false" onAction="#openFile" text="Open…" />
             <Menu mnemonicParsing="false" text="Open Recent" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="saveNormalMenuItem" mnemonicParsing="false" text="Save" />
-                  <MenuItem fx:id="saveToMenuItem" mnemonicParsing="false" text="Save as" onAction="#saveAs" />
+                  <MenuItem fx:id="saveToMenuItem" mnemonicParsing="false" onAction="#saveAs" text="Save as" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="clearChanges" mnemonicParsing="false" onAction="#resetAll" text="Clear Changes" />
                   <MenuItem fx:id="emptyListMenuItem" mnemonicParsing="false" text="New empty todo list" />
@@ -61,8 +61,8 @@
         </Menu>
         <Menu mnemonicParsing="false" text="_Category">
                <items>
-                  <MenuItem fx:id="allCateg" mnemonicParsing="false" text="All" />
-                  <MenuItem fx:id="doneCateg" mnemonicParsing="false" text="Done" />
+                  <MenuItem fx:id="allCateg" mnemonicParsing="false" onAction="#getClickedMenuItem" text="All" />
+                  <MenuItem fx:id="doneCateg" mnemonicParsing="false" onAction="#displayDone" text="Done" />
                   <Menu fx:id="categoryMenu" mnemonicParsing="false" onAction="#getClickedMenuItem" text="Categories" />
                </items></Menu>
       </menus>

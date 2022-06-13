@@ -43,10 +43,7 @@ public class CsvIo {
 	            // solange Zeilen in der Datei vorhanden
 	            while ((line = br.readLine()) != null)
 	            {
-	                // Zeilen anhand des Separators,
-	                // z.B. ";", aufsplitten
-	                String[] todoArray = line.split(";");
-	                Todo todo = new Todo (todoArray[0], todoArray[1], todoArray[2]);
+	                Todo todo = new Todo(line);
 	                todoList.add(todo);
 	               
 	            }
@@ -81,7 +78,7 @@ public class CsvIo {
 	    	
 	    	PrintWriter pw = new PrintWriter(file);
 	    	for(Todo e : todoList) {
-		    	String todoCsv = e.toCsv();
+		    	String todoCsv = e.generateCSVline();
 		    	pw.println(todoCsv);
 	    	}
 	    	pw.close();

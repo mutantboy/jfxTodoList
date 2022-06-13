@@ -1,6 +1,7 @@
 package application;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import exception.BadStatusException;
@@ -44,18 +45,28 @@ public class Todo {
 		setHeader(header);
 		setCategory(category);
 		setTodo(todo);
-		setStatus(Status.getStatusFromCode(0));
+		setStatus(Status.PENDING);
 		dateCreated = LocalDate.now();
 		System.out.println(generateCSVline());
 	}
 	
-	
+	public Todo(String csvLine) {
+		String[] csv = csvLine.split(";");
+		setCategory(csv[0].trim());
+		setHeader(csv[1].trim());
+		setTodo(csv[2].trim());
+		setStatus(Status.getStatusFromCode(Integer.parseInt(csv[3].trim())));
+		setDateCreated(LocalDate.parse(csv[4].trim()));
+	}
+
+	public void setDateCreated(LocalDate dateCreated) {
+		this.dateCreated = dateCreated;
+	}
 
 	public String generateCSVline() {
-		return String.format("%s, %s, %s, %d, %s;", this.category, this.header, this.todo, this.status.ordinal(), this.dateCreated);
+		return String.format("%s; %s; %s; %d; %s;", this.category, this.header, this.todo, this.status.ordinal(), this.dateCreated);
 		//return " ";
 	}
-	
 
 	public String getHeader() {
 		return header;
@@ -112,16 +123,9 @@ public class Todo {
 	}
 
 
-
 	@Override
 	public String toString() {
 		return this.header + ": " + this.dateCreated;
-	}
-
-
-
-	public String toCsv() {
-		return getHeader() + ";" + getCategory() + ";" + getTodo();
 	}
 	
 }
