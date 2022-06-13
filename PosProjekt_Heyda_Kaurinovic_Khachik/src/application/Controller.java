@@ -1,38 +1,26 @@
 package application;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import Csv.CsvIo;
+import application.Todo.Status;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.Window;
-
-import java.io.Console;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-
-import Csv.CsvIo;
-import javafx.scene.input.MouseEvent;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
-
-
-import application.Todo.Status;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class Controller {
 
@@ -62,6 +50,8 @@ public class Controller {
 	MenuItem allCateg;
 	@FXML
 	MenuItem doneCateg;
+	@FXML
+	MenuItem pendingCateg;
 	
 	@FXML
 	Menu categoryMenu;
@@ -97,16 +87,20 @@ public class Controller {
 	
 	@FXML
 	public void initialize() {
-		ArrayList<Todo> loadedTodos = CsvIo.LoadCSV();
-		todoObsList.addAll(loadedTodos);
 		todoList.setItems(todoObsList); //ListView is null when in construction stage, but not when initializing FXML file
 		setListeners(); //setting listeners after initialization of FXML and not after construction of class
 		this.todoCategoryFilter.put(allCateg.getText().toUpperCase(), new ArrayList<Todo>());
 		this.todoCategoryFilter.put(doneCateg.getText().toUpperCase(), new ArrayList<Todo>());
+		this.todoCategoryFilter.put(pendingCateg.getText().toUpperCase(), new ArrayList<Todo>());
+		ArrayList<Todo> loadedTodos = CsvIo.LoadCSV();
 		loadedTodos.forEach(item -> {
 			populateCategoryMenuItemsAndCategoryLists(item);
 		});
 		this.selectedCategory = allCateg.getText().toUpperCase();
+		
+
+		todoObsList.addAll(this.todoCategoryFilter.get(allCateg.getText().toUpperCase()));
+
 	}
 	
 	//ActionEvents from FXML / Scene builder
@@ -122,6 +116,10 @@ public class Controller {
 	
 	
 	public void saveToExisting(ActionEvent e) {
+		if (selectedItemidx == -1) {
+			createAlert("No Item selected", "Please select an item first, before updating the change");
+			return;
+		}
 		if (!checkInputFields()) {
 			createAlert("Bad input", "One or more input fields are empty. Please fill all of them out"); 
 			return;
@@ -157,9 +155,8 @@ public class Controller {
 		else {
 			this.todoCategoryFilter.get(selectedCategory).remove(itemToDelete);
 			this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).remove(itemToDelete);
-
 		}
-		
+		 
 		setObsListContent(this.todoCategoryFilter.get(selectedCategory));	
 		resetInput(e);
 		CsvIo.writeCsv(this.todoObsList);
@@ -188,6 +185,9 @@ public class Controller {
 	public void displayDone(ActionEvent e) {
 		setObsListContent(this.todoCategoryFilter.get(doneCateg.getText().toUpperCase()));
 	}
+	public void displayPending(ActionEvent e) {
+		
+	}
 	
 	//File Logic
 	public void saveAs(ActionEvent e) {
@@ -204,7 +204,7 @@ public class Controller {
 			return;
 		}
 		CsvIo.setFilePath(newFileLocation.getPath());
-		CsvIo.writeCsv(this.todoObsList);
+		CsvIo.writeCsv(this.todoCategoryFilter.get(allCateg.getText()));
 	}
 	
 	public void openFile(ActionEvent e) {
@@ -226,7 +226,7 @@ public class Controller {
 		for (Todo item : loadedTodos) {
 			populateCategoryMenuItemsAndCategoryLists(item);
 		}
-		todoObsList.addAll(loadedTodos);
+		todoObsList.setAll(this.todoCategoryFilter.get(allCateg.getText().toUpperCase()));
 	}
 	
 	//None ActionEvent listeners from FXML / Scene builder
@@ -236,6 +236,10 @@ public class Controller {
 	}
 	
 	private void populateCategoryMenuItemsAndCategoryLists(Todo todoItem) {
+		if (todoItem.getStatus().ordinal() == 1) {
+			this.todoCategoryFilter.get(doneBtn.getText().toUpperCase()).add(todoItem);
+			return;
+		}
 		if(!checkCategoryInMap(todoItem.getCategory())) {
 			createCategoryMenuItem(todoItem.getCategory());
 			this.todoCategoryFilter.put(todoItem.getCategory().toUpperCase(), new ArrayList<Todo>());
@@ -253,8 +257,7 @@ public class Controller {
 		this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).add(todoItem);
 		this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).add(todoItem);*/
 		populateCategoryMenuItemsAndCategoryLists(todoItem);
-		this.todoObsList.add(todoItem);
-		CsvIo.writeCsv(this.todoObsList);
+		this.todoObsList.setAll(this.todoCategoryFilter.get(selectedCategory));
 	}
 	
 	
@@ -269,12 +272,15 @@ public class Controller {
 		int idxAll = this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).indexOf(todoItem);
 		int idxCateg = this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).indexOf(todoItem);
 		//set them
-		this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).set(idxAll, todoItem);
-		this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).set(idxCateg, todoItem);
+		try {
+			this.todoCategoryFilter.get(allCateg.getText().toUpperCase()).set(idxAll, todoItem);
+			this.todoCategoryFilter.get(todoItem.getCategory().toUpperCase()).set(idxCateg, todoItem);
+		} catch(java.lang.IndexOutOfBoundsException e) {
+			createAlert("Something went wrong", "Something went wrong with updating the selected todo");
+		}
+		
 		//System.out.println(idxAll + " " + idxCateg);
-		this.todoObsList.set(selectedItemidx, todoItem);
-		CsvIo.writeCsv(this.todoObsList);
-
+		setObsListContent(this.todoCategoryFilter.get(selectedCategory));
 	}
 	
 	public void resetTextFields() {
@@ -285,6 +291,10 @@ public class Controller {
 
 	public void createAlert(String header, String errMsg) {
 		System.out.println(header + " " + errMsg);
+		Alert alert = new Alert(AlertType.ERROR);
+		alert.setHeaderText(header);
+		alert.setContentText(errMsg);
+		alert.show();
 	}
 	
 	public void setObsListContent(ArrayList<Todo> list) {

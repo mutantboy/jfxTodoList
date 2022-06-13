@@ -62,6 +62,7 @@
         <Menu mnemonicParsing="false" text="_Category">
                <items>
                   <MenuItem fx:id="allCateg" mnemonicParsing="false" onAction="#getClickedMenuItem" text="All" />
+                  <MenuItem fx:id="pendingCateg" mnemonicParsing="false" onAction="#displayPending" text="Pending" />
                   <MenuItem fx:id="doneCateg" mnemonicParsing="false" onAction="#displayDone" text="Done" />
                   <Menu fx:id="categoryMenu" mnemonicParsing="false" onAction="#getClickedMenuItem" text="Categories" />
                </items></Menu>
@@ -73,7 +74,7 @@
             <Button fx:id="doneBtn" layoutX="493.0" layoutY="259.0" mnemonicParsing="false" onAction="#todoDone" prefHeight="25.0" prefWidth="55.0" text="Done" />
             <Button fx:id="delBtn" layoutX="569.0" layoutY="259.0" mnemonicParsing="false" onAction="#deleteTodo" text="Delete" />
             <Button fx:id="newTodoBtn" layoutX="232.0" layoutY="259.0" mnemonicParsing="false" onAction="#newTodo" text="New" />
-            <Button fx:id="saveBtn" layoutX="294.0" layoutY="259.0" mnemonicParsing="false" onAction="#saveToExisting" text="Save" />
+            <Button fx:id="saveBtn" layoutX="294.0" layoutY="259.0" mnemonicParsing="false" onAction="#saveToExisting" text="Update" />
             <TextField fx:id="categoryTxt" layoutX="455.0" layoutY="14.0" prefHeight="25.0" prefWidth="165.0" promptText="Category" />
             <TextArea fx:id="todoTxt" layoutX="232.0" layoutY="47.0" prefHeight="183.0" prefWidth="388.0" />
             <TextField fx:id="headerTxt" layoutX="232.0" layoutY="14.0" prefHeight="25.0" prefWidth="165.0" promptText="Header" />
